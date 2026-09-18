@@ -1,6 +1,6 @@
 # CONBUS tag lookup
 
-Find a CONBUS tag from 000 to 999, then copy its link or show its QR code. It all runs in the browser and keeps working offline after the first visit.
+Find a CONBUS tag from 000 to 999, and show its QR code. It all runs in the browser and keeps working offline after the first visit.
 
 Live at https://iameno9.github.io/conbus-tags/
 
