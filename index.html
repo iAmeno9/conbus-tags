@@ -184,6 +184,8 @@
 <script>
 // Small QR encoder for this page: byte mode, error correction level M, versions 1 to 6 (up to
 // 106 bytes). Follows ISO/IEC 18004 and is laid out like Project Nayuki's QR Code generator.
+// Masks are chosen the way Kazuhiko Arase's qrcode-generator (MIT license) chooses them, the
+// library this page used before, so every code is pixel for pixel the same as the ones it drew.
 // ponytail: versions 7+ need version info and uneven RS blocks; add those only if links get longer.
 function qrMatrix(text) {
   var EC_PER_BLOCK = [0, 10, 16, 26, 18, 24, 16];
@@ -268,7 +270,7 @@ function qrMatrix(text) {
   function format(mask) { // level M (00) plus the mask, BCH protected, drawn in both places
     var rem = mask, k;
     for (k = 0; k < 10; k++) { rem = (rem << 1) ^ ((rem >>> 9) * 0x537); }
-    var bits = (mask << 10 | rem) ^ 0x5412;
+    var bits = mask < 0 ? 0 : (mask << 10 | rem) ^ 0x5412; // -1 leaves every format module light
     function bit(n) { return (bits >>> n & 1) === 1; }
     for (k = 0; k < 6; k++) { set(8, k, bit(k)); }
     set(8, 7, bit(6));
@@ -277,9 +279,9 @@ function qrMatrix(text) {
     for (k = 9; k < 15; k++) { set(14 - k, 8, bit(k)); }
     for (k = 0; k < 8; k++) { set(size - 1 - k, 8, bit(k)); }
     for (k = 8; k < 15; k++) { set(8, size - 15 + k, bit(k)); }
-    set(8, size - 8, true); // always dark
+    set(8, size - 8, mask >= 0); // always dark in the finished code
   }
-  format(0);
+  format(-1); // reserve the format areas, left light while the masks are scored
 
   // Data bits zigzag up and down two columns at a time from the bottom right corner
   var n = 0;
@@ -314,30 +316,31 @@ function qrMatrix(text) {
       }
     }
   }
-  function penalty() { // the four scoring rules from the spec, lower scans better
-    var score = 0, darkCount = 0, lines = [];
-    for (var py = 0; py < size; py++) {
+  function penalty() { // qrcode-generator's lost points; lower wins, first mask wins a tie
+    var score = 0, darkCount = 0, py, px, r, c;
+    for (py = 0; py < size; py++) {
       var row = '', col = '';
-      for (var px = 0; px < size; px++) {
-        var here = dark[py][px];
+      for (px = 0; px < size; px++) {
+        var here = dark[py][px], same = 0;
+        for (r = Math.max(0, py - 1); r <= Math.min(size - 1, py + 1); r++) { // matching neighbours
+          for (c = Math.max(0, px - 1); c <= Math.min(size - 1, px + 1); c++) {
+            if ((r !== py || c !== px) && dark[r][c] === here) { same++; }
+          }
+        }
+        if (same > 5) { score += same - 2; }
+        if (py < size - 1 && px < size - 1 && here === dark[py + 1][px] && here === dark[py][px + 1] && here === dark[py + 1][px + 1]) { score += 3; }
+        if (here) { darkCount++; }
         row += here ? 1 : 0;
         col += dark[px][py] ? 1 : 0;
-        if (here) { darkCount++; }
-        if (px && py && here === dark[py - 1][px] && here === dark[py][px - 1] && here === dark[py - 1][px - 1]) { score += 3; }
       }
-      lines.push(row, col);
+      score += 40 * ((row.match(/(?=1011101)/g) || []).length + (col.match(/(?=1011101)/g) || []).length);
     }
-    lines.forEach(function (line) {
-      (line.match(/0{5,}|1{5,}/g) || []).forEach(function (run) { score += run.length - 2; });
-      score += 40 * (line.match(/(?=10111010000|00001011101)/g) || []).length;
-    });
-    return score + 10 * Math.floor(Math.abs(darkCount * 20 - size * size * 10) / (size * size));
+    return score + Math.abs(100 * darkCount / size / size - 50) / 5 * 10;
   }
 
   var best = 0, bestScore = Infinity;
   for (var m = 0; m < 8; m++) {
     applyMask(m);
-    format(m);
     var s = penalty();
     if (s < bestScore) { best = m; bestScore = s; }
     applyMask(m);
