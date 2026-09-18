@@ -17,7 +17,7 @@ self.addEventListener('activate', function (event) {
 self.addEventListener('fetch', function (event) {
   var req = event.request;
   if (req.method !== 'GET') { return; }
-  var fresh = fetch(req);
+  var fresh = fetch(req, { cache: 'no-cache' }); // ask the server, GitHub Pages lets browsers reuse files for 10 minutes
   event.waitUntil(fresh.then(function (res) {
     if (res.ok && !res.redirected) {
       var copy = res.clone();
