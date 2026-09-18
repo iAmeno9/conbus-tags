@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>CONBUS Tag Lookup</title>
-<meta name="description" content="Look up CONBUS QR tags 000 to 999, copy their links and show their QR codes. Works offline.">
+<meta name="description" content="Look up CONBUS QR tags 000 to 999 and show their QR codes. Works offline.">
 <meta name="theme-color" content="#1B1E1F">
 <meta name="color-scheme" content="dark">
 <meta name="format-detection" content="telephone=no">
@@ -44,19 +44,16 @@
     touch-action: manipulation; -webkit-user-select: none; user-select: none;
   }
   :focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
-  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
   /* Icons are SVG masks painted in the current text colour */
-  .i, .row-main::after, .copy::before {
+  .i, .show::before {
     content: ""; display: inline-block; flex: none; width: 18px; height: 18px; background: currentColor;
     -webkit-mask: var(--svg) center / contain no-repeat; mask: var(--svg) center / contain no-repeat;
   }
   .i-search { --svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E"); }
   .i-clear { --svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='m15 9-6 6M9 9l6 6'/%3E%3C/svg%3E"); }
   .i-offline { width: 15px; height: 15px; --svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='m8.5 12.5 2.5 2.5 4.5-5'/%3E%3C/svg%3E"); }
-  .row-main::after { color: var(--ink-dim); transition: color .15s; --svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='7' height='7' rx='1'/%3E%3Crect x='14' y='3' width='7' height='7' rx='1'/%3E%3Crect x='3' y='14' width='7' height='7' rx='1'/%3E%3Cpath d='M14 14h3v3h-3zM21 14v.01M21 21h-4M14 21v.01'/%3E%3C/svg%3E"); }
-  .copy::before { width: 16px; height: 16px; --svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='9' y='9' width='12' height='12' rx='2'/%3E%3Cpath d='M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1'/%3E%3C/svg%3E"); }
-  .copy.is-done::before { --svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E"); }
+  .show::before { width: 16px; height: 16px; --svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='7' height='7' rx='1'/%3E%3Crect x='14' y='3' width='7' height='7' rx='1'/%3E%3Crect x='3' y='14' width='7' height='7' rx='1'/%3E%3Cpath d='M14 14h3v3h-3zM21 14v.01M21 21h-4M14 21v.01'/%3E%3C/svg%3E"); }
 
   .wrap { max-width: 640px; margin: 0 auto; }
   header { margin-bottom: 20px; }
@@ -84,10 +81,10 @@
   .offline { display: inline-flex; align-items: center; gap: 6px; color: var(--teal); }
 
   .list { margin: 0; padding: 0; list-style: none; }
-  .list li { display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--line); content-visibility: auto; contain-intrinsic-size: auto 61px; }
+  .list li { display: flex; border-bottom: 1px solid var(--line); content-visibility: auto; contain-intrinsic-size: auto 61px; }
   .row-main {
     flex: 1; min-width: 0; display: flex; align-items: center; gap: 14px; min-height: 52px; margin: 4px 0;
-    padding: 0 10px 0 6px; border-radius: 10px; text-align: left; transition: background-color .15s;
+    padding: 0 6px; border-radius: 10px; text-align: left; transition: background-color .15s;
   }
   .row-main:focus-visible { outline-offset: -2px; }
   .row-main:active { background: var(--raised); }
@@ -103,16 +100,11 @@
     transition: background-color .15s, border-color .15s, color .15s;
   }
   .btn:active { background: rgba(94, 154, 154, .2); }
-  .btn.is-done { border-color: var(--amber); color: var(--amber); }
-  .list .copy { flex: none; min-width: 98px; padding: 0 12px; font-size: 14px; }
-  .btn-primary { background: var(--amber); border-color: var(--amber); color: var(--bg); }
-  .btn-primary:active { background: #D69330; }
-  .btn-primary.is-done { color: var(--bg); }
+  .show { flex: none; min-height: 38px; padding: 0 12px; font-size: 14px; }
   @media (hover: hover) {
     .row-main:hover { background: var(--raised); }
-    .row-main:hover::after { color: var(--teal); }
+    .row-main:hover .show { border-color: var(--teal); background: rgba(94, 154, 154, .12); }
     .btn:hover { border-color: var(--teal); background: rgba(94, 154, 154, .12); }
-    .btn-primary:hover { background: #F0B458; border-color: #F0B458; }
     .clear:hover { color: var(--ink); }
   }
 
@@ -127,10 +119,10 @@
   .sheet > div { padding: 24px max(20px, env(safe-area-inset-right)) calc(20px + var(--safe-b)) max(20px, env(safe-area-inset-left)); }
   .sheet h2 { margin: 0; font: 600 22px/1.2 var(--mono); letter-spacing: .02em; }
   .sheet h2 span { color: var(--amber); }
-  .sheet-url { margin: 6px auto 18px; font: 12.5px/1.45 var(--mono); color: var(--ink-dim); word-break: break-all; -webkit-user-select: all; user-select: all; }
+  .sheet-url { margin: 6px auto 18px; font: 12.5px/1.45 var(--mono); color: var(--ink-dim); word-break: break-all; }
   .qr { display: block; margin: 0 auto; max-width: 100%; height: auto; border-radius: 12px; image-rendering: pixelated; }
   .save-hint { display: none; margin: 12px 0 0; font-size: 13px; color: var(--ink-dim); }
-  .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+  #sheet-close { width: 100%; margin-top: 20px; }
   .sheet[open] { animation: sheet-up .5s cubic-bezier(.16, 1, .3, 1); }
   .sheet[open]::backdrop { animation: fade .35s ease-out; }
   @keyframes sheet-up { from { transform: translateY(100%); } }
@@ -149,7 +141,7 @@
 <div class="wrap">
   <header id="top">
     <h1>QR tag lookup</h1>
-    <p class="lede">Every CONBUS tag from 000 to 999 resolves to <code>bit.ly/2U1R3rM?id=CONBUS|XXX</code>. Search by tag number to copy a link or show its QR code.</p>
+    <p class="lede">Every CONBUS tag from 000 to 999 resolves to <code>bit.ly/2U1R3rM?id=CONBUS|XXX</code>. Search by tag number to show its QR code.</p>
   </header>
 
   <div class="search" role="search">
@@ -167,17 +159,12 @@
   <ul id="list" class="list"></ul>
 </div>
 
-<p id="announce" class="sr-only" role="status"></p>
-
 <dialog id="sheet" class="sheet" aria-labelledby="sheet-title">
   <div>
     <h2 id="sheet-title">CONBUS <span id="sheet-code"></span></h2>
     <p id="sheet-url" class="sheet-url"></p>
     <p id="save-hint" class="save-hint">Touch and hold the code to save it</p>
-    <div class="actions">
-      <button id="sheet-copy" class="btn btn-primary copy" type="button" data-label="Copy link">Copy link</button>
-      <button id="sheet-close" class="btn" type="button">Close</button>
-    </div>
+    <button id="sheet-close" class="btn" type="button">Close</button>
   </div>
 </dialog>
 
@@ -363,7 +350,7 @@ function qrMatrix(text) {
   function $(id) { return document.getElementById(id); }
   function pad(n) { return ('00' + n).slice(-3); }
 
-  var list = $('list'), search = $('search'), clear = $('clear'), sheet = $('sheet'), sheetCopy = $('sheet-copy');
+  var list = $('list'), search = $('search'), clear = $('clear'), sheet = $('sheet');
   var qrImg = new Image(); // made here rather than in the markup so the page never holds an empty image
   qrImg.className = 'qr';
   $('save-hint').parentNode.insertBefore(qrImg, $('save-hint'));
@@ -371,10 +358,9 @@ function qrMatrix(text) {
   var html = '';
   for (var i = 0; i < TOTAL; i++) {
     var c = pad(i);
-    html += '<li data-code="' + c + '">' +
-      '<button type="button" class="row-main" aria-label="Show QR code for tag ' + c + '">' +
-      '<span class="code">' + c + '</span><span class="url"><span>' + PREFIX + '</span>CONBUS|' + c + '</span></button>' +
-      '<button type="button" class="btn copy" aria-label="Copy link for tag ' + c + '">Copy</button></li>';
+    html += '<li><button type="button" class="row-main" data-code="' + c + '" aria-label="Show QR code for tag ' + c + '">' +
+      '<span class="code">' + c + '</span><span class="url"><span>' + PREFIX + '</span>CONBUS|' + c + '</span>' +
+      '<span class="btn show">Show QR</span></button></li>';
   }
   list.innerHTML = html;
   var rows = list.children, codes = list.querySelectorAll('.code'), lastQuery = null;
@@ -401,43 +387,6 @@ function qrMatrix(text) {
     if (window.pageYOffset > listTop) { window.scrollTo(0, listTop); }
   }
 
-  function copyText(text, host, done) {
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(legacyCopy(text, host)); });
-    } else {
-      done(legacyCopy(text, host));
-    }
-  }
-
-  // Without the async clipboard (old browsers, plain http), copy from a hidden textarea
-  function legacyCopy(text, host) {
-    var ta = document.createElement('textarea');
-    ta.value = text;
-    ta.setAttribute('readonly', '');
-    ta.style.cssText = 'position:fixed;top:-100px;opacity:0';
-    host.appendChild(ta);
-    ta.focus();
-    ta.select();
-    ta.setSelectionRange(0, text.length);
-    try { return document.execCommand('copy'); } catch (e) { return false; } finally { host.removeChild(ta); }
-  }
-
-  function resetCopy(btn) {
-    clearTimeout(btn.timer);
-    btn.textContent = btn.getAttribute('data-label') || 'Copy';
-    btn.classList.remove('is-done');
-  }
-
-  function copyLink(btn, code) {
-    copyText(BASE + code, btn.parentNode, function (ok) {
-      resetCopy(btn);
-      btn.textContent = ok ? 'Copied' : 'Failed';
-      btn.classList.toggle('is-done', ok);
-      $('announce').textContent = (ok ? 'Copied the link for tag ' : 'Could not copy the link for tag ') + code;
-      btn.timer = setTimeout(function () { resetCopy(btn); }, 1600);
-    });
-  }
-
   var opener = null;
 
   function openTag(code, from) {
@@ -458,8 +407,6 @@ function qrMatrix(text) {
     qrImg.alt = 'QR code for CONBUS tag ' + code;
     $('sheet-code').textContent = code;
     $('sheet-url').textContent = url;
-    sheetCopy.setAttribute('data-code', code);
-    resetCopy(sheetCopy);
     opener = from;
     if (sheet.showModal) { sheet.showModal(); } else { sheet.setAttribute('open', ''); }
   }
@@ -479,11 +426,8 @@ function qrMatrix(text) {
   });
   list.addEventListener('click', function (e) {
     var btn = e.target.closest('button');
-    if (!btn) { return; }
-    var code = btn.parentNode.getAttribute('data-code');
-    if (btn.classList.contains('copy')) { copyLink(btn, code); } else { openTag(code, btn); }
+    if (btn) { openTag(btn.getAttribute('data-code'), btn); }
   });
-  sheetCopy.addEventListener('click', function () { copyLink(sheetCopy, sheetCopy.getAttribute('data-code')); });
   $('sheet-close').addEventListener('click', closeSheet);
   sheet.addEventListener('click', function (e) {
     if (e.target === sheet) { closeSheet(); } // tap on the dimmed backdrop
